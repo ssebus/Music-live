@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LiveWave FM — Twoje Radio na Żywo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090d16;
+      --bg-card: #111827;
+      --bg-card-hover: #172033;
+      --bg-input: #0b101b;
+      --border: rgba(255, 255, 255, 0.09);
+      --border-strong: rgba(255, 255, 255, 0.18);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --accent-glow: rgba(99, 102, 241, 0.35);
+      --live: #ef4444;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --radius: 16px;
+    }
+
+    body[data-theme="emerald"] {
+      --bg: #061311;
+      --bg-card: #0c211e;
+      --bg-card-hover: #122d29;
+      --bg-input: #071715;
+      --accent: #10b981;
+      --accent-hover: #059669;
+      --accent-glow: rgba(16, 185, 129, 0.35);
+    }
+
+    body[data-theme="amber"] {
+      --bg: #140e07;
+      --bg-card: #22170c;
+      --bg-card-hover: #2e2011;
+      --bg-input: #171008;
+      --accent: #f59e0b;
+      --accent-hover: #d97706;
+      --accent-glow: rgba(245, 158, 11, 0.35);
+    }
+
+    body[data-theme="light"] {
+      --bg: #f1f5f9;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f8fafc;
+      --bg-input: #f1f5f9;
+      --border: rgba(15, 23, 42, 0.1);
+      --border-strong: rgba(15, 23, 42, 0.2);
+      --text: #0f172a;
+      --text-muted: #475569;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 180px;
+      transition: background 0.25s, color 0.25s;
+    }
+
+    button, input, select, textarea { font-family: inherit; }
+    button { cursor: pointer; border: none; outline: none; transition: all 0.18s ease; }
+
+    .topbar {
+      position: sticky; top: 0; z-index: 40;
+      background: rgba(9, 13, 22, 0.88);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+    }
+    body[data-theme="light"] .topbar { background: rgba(255, 255, 255, 0.9); }
+
+    .topbar-inner {
+      max-width: 1180px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; flex-wrap: wrap;
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-logo {
+      width: 42px; height: 42px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent), #ec4899);
+      display: grid; place-items: center; font-size: 20px; color: #fff;
+      box-shadow: 0 6px 20px var(--accent-glow);
+    }
+    .brand h1 { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.02em; }
+    .brand span { font-size: 0.78rem; color: var(--text-muted); display: block; }
+
+    .top-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    .btn {
+      padding: 10px 16px; border-radius: 11px; font-weight: 600; font-size: 0.88rem;
+      display: inline-flex; align-items: center; gap: 7px;
+    }
+    .btn-primary {
+      background: var(--accent); color: #fff;
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+    .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+    .btn-secondary {
+      background: var(--bg-card); color: var(--text);
+      border: 1px solid var(--border-strong);
+    }
+    .btn-secondary:hover { background: var(--bg-card-hover); }
+    .btn-danger { background: rgba(239, 68, 68, 0.16); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.35); }
+    .btn-danger:hover { background: #ef4444; color: #fff; }
+    .btn-warning { background: rgba(245, 158, 11, 0.16); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35); }
+    .btn-warning:hover { background: #f59e0b; color: #000; }
+    .btn-success { background: rgba(16, 185, 129, 0.16); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35); }
+    .btn-success:hover { background: #10b981; color: #fff; }
+
+    .container { max-width: 1180px; margin: 0 auto; padding: 20px; }
+
+    .sync-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; flex-wrap: wrap;
+      padding: 11px 16px; border-radius: 12px;
+      background: var(--bg-card); border: 1px solid var(--border);
+      margin-bottom: 20px; font-size: 0.84rem;
+    }
+    .sync-dot {
+      width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 8px;
+      background: var(--warning);
+    }
+    .sync-dot.ok { background: var(--success); box-shadow: 0 0 10px var(--success); }
+    .sync-dot.err { background: var(--live); box-shadow: 0 0 10px var(--live); }
+
+    .admin-panel {
+      display: none;
+      background: linear-gradient(145deg, rgba(99, 102, 241, 0.14), rgba(236, 72, 153, 0.08));
+      border: 1px solid var(--accent);
+      border-radius: 18px; padding: 20px; margin-bottom: 26px;
+    }
+    .admin-panel.show { display: block; }
+    .admin-header {
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px; margin-bottom: 16px;
+      padding-bottom: 14px; border-bottom: 1px solid var(--border);
+    }
+    .admin-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px; margin-bottom: 14px;
+    }
+    .admin-actions-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .mic-studio {
+      display: none; margin-top: 14px; padding: 14px; border-radius: 12px;
+      background: var(--bg-card); border: 1px solid var(--border-strong);
+    }
+    .mic-studio.show { display: block; }
+    .meter-wrap { height: 10px; background: var(--bg-input); border-radius: 99px; overflow: hidden; margin: 10px 0; }
+    .meter-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #10b981, #f59e0b, #ef4444); transition: width 0.07s; }
+
+    .section-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin: 28px 0 14px; gap: 10px; flex-wrap: wrap;
+    }
+    .section-head h2 { font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .section-sub { font-size: 0.82rem; color: var(--text-muted); }
+    .badge-count {
+      background: var(--accent); color: #fff; font-size: 0.75rem;
+      padding: 2px 9px; border-radius: 99px;
+    }
+
+    .grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(275px, 1fr));
+      gap: 18px;
+    }
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+      display: flex; flex-direction: column;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: var(--border-strong);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+    }
+    .card.playing { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); }
+
+    .card-cover {
+      position: relative; height: 165px; background: #1e293b; overflow: hidden;
+    }
+    .card-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .card-badges {
+      position: absolute; top: 10px; left: 10px; right: 10px;
+      display: flex; justify-content: space-between; align-items: center; gap: 6px;
+    }
+    .pill {
+      padding: 4px 10px; border-radius: 99px; font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.04em; backdrop-filter: blur(8px);
+    }
+    .pill-live { background: rgba(239, 68, 68, 0.92); color: #fff; }
+    .pill-paused { background: rgba(245, 158, 11, 0.95); color: #000; }
+    .pill-247 { background: rgba(16, 185, 129, 0.92); color: #fff; }
+    .pill-playlist { background: rgba(99, 102, 241, 0.92); color: #fff; }
+    .pill-lock { background: rgba(15, 23, 42, 0.85); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.4); }
+    .pill-owner {
+      background: linear-gradient(135deg, #f59e0b, #eab308);
+      color: #090d16; font-weight: 800;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.45);
+    }
+    .card.is-owner { border-color: rgba(245, 158, 11, 0.45); }
+
+    .card-body { padding: 15px; flex: 1; display: flex; flex-direction: column; }
+    .card-title { font-size: 1.04rem; font-weight: 700; margin-bottom: 4px; }
+    .card-now { font-size: 0.83rem; color: var(--accent); font-weight: 600; margin-bottom: 6px; }
+    .card-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 14px; flex: 1; }
+    .card-footer { display: flex; gap: 8px; }
+    .card-footer .btn { flex: 1; justify-content: center; }
+
+    .empty-box {
+      grid-column: 1 / -1;
+      padding: 24px; border-radius: 14px;
+      background: var(--bg-card); border: 1px dashed var(--border-strong);
+      color: var(--text-muted); text-align: center; font-size: 0.88rem;
+    }
+
+    .modal-backdrop {
+      display: none; position: fixed; inset: 0; z-index: 100;
+      background: rgba(2, 6, 23, 0.8); backdrop-filter: blur(6px);
+      align-items: center; justify-content: center; padding: 16px;
+      overflow-y: auto;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: var(--bg-card); border: 1px solid var(--border-strong);
+      border-radius: 20px; width: 100%; max-width: 580px;
+      padding: 22px; max-height: 92vh; overflow-y: auto;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+    }
+    .modal-head {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    }
+    .modal-head h3 { font-size: 1.15rem; font-weight: 700; }
+    .close-btn {
+      background: var(--bg-input); color: var(--text-muted);
+      width: 32px; height: 32px; border-radius: 8px; font-size: 1.1rem;
+    }
+
+    .field { margin-bottom: 13px; }
+    .field label { display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; color: var(--text-muted); }
+    .input, .select {
+      width: 100%; padding: 10px 12px; border-radius: 10px;
+      background: var(--bg-input); color: var(--text);
+      border: 1px solid var(--border-strong); font-size: 0.9rem;
+    }
+    .input:focus, .select:focus { outline: none; border-color: var(--accent); }
+
+    .cover-presets { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+    .cover-thumb {
+      width: 54px; height: 38px; border-radius: 8px; object-fit: cover;
+      border: 2px solid transparent; cursor: pointer;
+    }
+    .cover-thumb.selected { border-color: var(--accent); transform: scale(1.06); }
+
+    .template-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 8px; margin-top: 6px;
+    }
+    .tpl-btn {
+      display: flex; align-items: center; gap: 10px; text-align: left;
+      padding: 8px 10px; border-radius: 11px;
+      background: var(--bg-input); color: var(--text);
+      border: 1px solid var(--border-strong);
+    }
+    .tpl-btn:hover { border-color: var(--accent); background: var(--bg-card-hover); }
+    .tpl-btn img { width: 38px; height: 38px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+    .tpl-btn strong { display: block; font-size: 0.82rem; }
+    .tpl-btn span { display: block; font-size: 0.72rem; color: var(--text-muted); }
+
+    .player-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 60;
+      background: rgba(11, 16, 27, 0.96); backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border-strong);
+      padding: 12px 16px;
+      display: none;
+    }
+    body[data-theme="light"] .player-bar { background: rgba(255, 255, 255, 0.96); }
+    .player-bar.active { display: block; }
+    .player-inner {
+      max-width: 1180px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; flex-wrap: wrap;
+    }
+    .player-info { display: flex; align-items: center; gap: 12px; min-width: 190px; flex: 1; }
+    .player-info img { width: 48px; height: 48px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
+
+    /* Poprawione okienko YouTube bez pasów i ucięć */
+    .yt-dock {
+      display: none;
+      position: relative;
+      width: 240px; height: 135px;
+      border-radius: 14px; overflow: hidden;
+      border: 2px solid var(--border-strong);
+      background: #000; flex-shrink: 0;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .yt-dock.show { display: flex; align-items: center; justify-content: center; }
+    .yt-dock iframe {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 185%; height: 185%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .player-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .vol-slider { width: 90px; accent-color: var(--accent); }
+    .boost-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--bg-input); border: 1px solid var(--border-strong);
+      padding: 6px 10px; border-radius: 10px; font-size: 0.78rem; font-weight: 600;
+    }
+
+    .toast-wrap {
+      position: fixed; top: 76px; right: 20px; z-index: 200;
+      display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+    }
+    .toast {
+      background: #1e293b; color: #fff; border-left: 4px solid var(--accent);
+      padding: 12px 16px; border-radius: 10px; font-size: 0.86rem; font-weight: 500;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    }
+
+    @media (max-width: 640px) {
+      .yt-dock { width: 180px; height: 101px; }
+      body { padding-bottom: 210px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-logo">📻</div>
+        <div>
+          <h1>LiveWave FM</h1>
+          <span>Twoja platforma radiowa na żywo</span>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button id="btn-open-create" class="btn btn-primary">➕ Utwórz swoje radio</button>
+        <button id="btn-open-admin-login" class="btn btn-secondary">🎛️ Panel Admina</button>
+        <button id="btn-open-settings" class="btn btn-secondary">🎨 Motyw</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="sync-bar">
+      <div>
+        <span id="sync-dot" class="sync-dot"></span>
+        <strong id="sync-text">Łączenie z chmurą Firebase (miusic-73bfd)...</strong>
+      </div>
+      <button id="btn-force-sync" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">🔄 Odśwież listę</button>
+    </div>
+
+    <!-- Panel Administratora (Panel DJ-a i zarządzanie) -->
+    <section id="admin-panel" class="admin-panel">
+      <div class="admin-header">
+        <div>
+          <span style="font-size:0.75rem; text-transform:uppercase; color:var(--accent); font-weight:800;">🎛️ Panel Administratora i DJ-a</span>
+          <h2 id="admin-station-heading" style="font-size:1.25rem; margin-top:2px;">Moje Radio</h2>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button id="btn-admin-live" class="btn btn-success">▶️ Wznów transmisję</button>
+          <button id="btn-admin-stop" class="btn btn-warning">⏸️ Zatrzymaj stację</button>
+          <button id="btn-admin-delete" class="btn btn-danger">🗑️ Usuń stację</button>
+          <button id="btn-admin-close" class="btn btn-secondary">Zamknij panel</button>
+        </div>
+      </div>
+
+      <div class="admin-grid">
+        <div class="field">
+          <label>Nazwa radia</label>
+          <input id="adm-name" class="input" type="text" />
+        </div>
+        <div class="field">
+          <label>Co leci teraz / Opis audycji</label>
+          <input id="adm-now" class="input" type="text" placeholder="np. Wieczorne granie" />
+        </div>
+        <div class="field">
+          <label>Hasło dla słuchaczy (puste = otwarte)</label>
+          <input id="adm-pass" class="input" type="text" placeholder="Brak hasła" />
+        </div>
+        <div class="field">
+          <label>Zmień okładkę (plik z urządzenia)</label>
+          <input id="adm-cover-file" class="input" type="file" accept="image/*" />
+        </div>
+      </div>
+
+      <div class="admin-grid">
+        <div class="field">
+          <label>Kategoria i źródło dźwięku</label>
+          <select id="adm-type" class="select">
+            <option value="mic">🔴 Stacja na Żywo — Mikrofon na żywo (Twój głos)</option>
+            <option value="yt_live">🔴 Stacja na Żywo — YouTube LIVE</option>
+            <option value="stream_live">🔴 Stacja na Żywo — Własny strumień na żywo</option>
+            <option value="stream_247">🎶 Stacja Muzyczna 24/7 — Strumień radiowy 24/7</option>
+            <option value="yt_loop">🎵 Piosenki / Playlista — YouTube 1 piosenka w pętli</option>
+            <option value="yt_playlist">🎵 Piosenki / Playlista — YouTube cała playlista</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Link YouTube / URL strumienia</label>
+          <input id="adm-url" class="input" type="text" placeholder="https://www.youtube.com/watch?v=..." />
+        </div>
+      </div>
+
+      <div class="admin-actions-row">
+        <button id="btn-admin-save" class="btn btn-primary">💾 Zapisz zmiany dla słuchaczy</button>
+      </div>
+
+      <!-- Studio Mikrofonowe (Panel DJ-a z pełną kontrolą) -->
+      <div id="mic-studio" class="mic-studio">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <strong>🎙️ Panel DJ-a / Mikrofon na Żywo</strong>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button id="btn-mic-toggle" class="btn btn-primary">🎙️ Włącz nadawanie głosu</button>
+            <button id="btn-mic-monitor" class="btn btn-secondary">🔊 Odsłuch własny: WYŁ.</button>
+          </div>
+        </div>
+        <div class="meter-wrap"><div id="mic-meter" class="meter-fill"></div></div>
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:8px;">
+          <div class="boost-pill">
+            <span>🎤 Wzmocnienie głosu DJ-a:</span>
+            <input id="mic-boost-slider" class="vol-slider" type="range" min="1" max="5" step="0.2" value="3.2" />
+            <span id="mic-boost-val">320%</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <label style="font-size:0.82rem; color:var(--text-muted);">Podkład muzyczny MP3:</label>
+            <input id="mic-bg-file" type="file" accept="audio/*" style="font-size:0.82rem;" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KATEGORIA 1: Stacje na Żywo -->
+    <div class="section-head">
+      <div>
+        <h2>🔴 Stacje na Żywo (LIVE) <span id="live-count" class="badge-count">0</span></h2>
+        <span class="section-sub">Audycje mikrofonowe prowadzone na żywo oraz transmisje LIVE</span>
+      </div>
+    </div>
+    <div id="live-grid" class="grid"></div>
+
+    <!-- KATEGORIA 2: Stacje Muzyczne 24/7 -->
+    <div class="section-head" style="margin-top: 34px;">
+      <div>
+        <h2>🎶 Stacje Muzyczne 24/7 <span id="music247-count" class="badge-count">0</span></h2>
+        <span class="section-sub">Całodobowe radia muzyczne utworzone na platformie</span>
+      </div>
+    </div>
+    <div id="music247-grid" class="grid"></div>
+
+    <!-- KATEGORIA 3: Piosenki i Playlisty w pętli -->
+    <div class="section-head" style="margin-top: 34px;">
+      <div>
+        <h2>🎵 Piosenki w pętli i Playlisty <span id="playlist-count" class="badge-count">0</span></h2>
+        <span class="section-sub">Zautomatyzowane utwory w pętli oraz playlisty muzyczne z YouTube</span>
+      </div>
+    </div>
+    <div id="playlist-grid" class="grid"></div>
+  </main>
+
+  <!-- Dolny odtwarzacz -->
+  <div id="player-bar" class="player-bar">
+    <div class="player-inner">
+      <div class="player-info">
+        <img id="pl-cover" src="" alt="Okładka" />
+        <div>
+          <div id="pl-title" style="font-weight:700; font-size:0.95rem;">Nazwa stacji</div>
+          <div id="pl-sub" style="font-size:0.8rem; color:var(--accent);">Na żywo</div>
+        </div>
+      </div>
+
+      <div id="yt-dock" class="yt-dock">
+        <div id="yt-player-mount"></div>
+      </div>
+
+      <div class="player-controls">
+        <button id="btn-pl-toggle" class="btn btn-primary">⏸️ Pauza</button>
+        <button id="btn-pl-stop" class="btn btn-secondary">⏹️ Zatrzymaj</button>
+        <div class="boost-pill">
+          <span>🔊 Wzmacniacz:</span>
+          <input id="pl-vol" class="vol-slider" type="range" min="0" max="3" step="0.1" value="2.2" />
+          <span id="pl-boost-val">220%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Tworzenia -->
+  <div id="modal-create" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-head">
+        <h3>📡 Utwórz swoje radio lub wypuść stację</h3>
+        <button class="close-btn" data-close="modal-create">✕</button>
+      </div>
+      <div class="field">
+        <label>Gotowe szablony stacji 24/7 i piosenek (kliknij, aby wczytać)</label>
+        <div id="template-grid" class="template-grid"></div>
+      </div>
+      <div class="field" style="margin-top:12px;">
+        <label>Nazwa Twojego radia *</label>
+        <input id="cr-name" class="input" type="text" placeholder="np. Moje Studio FM" />
+      </div>
+      <div class="field">
+        <label>Co aktualnie leci / Opis</label>
+        <input id="cr-now" class="input" type="text" placeholder="np. Najlepsza muzyka" />
+      </div>
+      <div class="field">
+        <label>Okładka (Wybierz z galerii lub wgraj własne zdjęcie)</label>
+        <input id="cr-cover-file" class="input" type="file" accept="image/*" style="margin-bottom:8px;" />
+        <div id="cr-presets" class="cover-presets"></div>
+      </div>
+      <div class="field">
+        <label>Kategoria i źródło dźwięku</label>
+        <select id="cr-type" class="select">
+          <option value="mic">🔴 Stacja na Żywo — Mikrofon na żywo (Twój głos)</option>
+          <option value="yt_live">🔴 Stacja na Żywo — YouTube LIVE</option>
+          <option value="stream_live">🔴 Stacja na Żywo — Własny strumień na żywo</option>
+          <option value="stream_247">🎶 Stacja Muzyczna 24/7 — Strumień radiowy 24/7</option>
+          <option value="yt_loop">🎵 Piosenki / Playlista — YouTube 1 piosenka w pętli</option>
+          <option value="yt_playlist">🎵 Piosenki / Playlista — YouTube cała playlista</option>
+        </select>
+      </div>
+      <div id="cr-url-wrap" class="field" style="display:none;">
+        <label>Link YouTube lub URL strumienia</label>
+        <input id="cr-url" class="input" type="text" placeholder="https://www.youtube.com/watch?v=..." />
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div class="field">
+          <label>Hasło dla słuchaczy</label>
+          <input id="cr-pass" class="input" type="text" placeholder="opcjonalnie" />
+        </div>
+        <div class="field">
+          <label>Twój tajny PIN Admina *</label>
+          <input id="cr-pin" class="input" type="text" value="1234" />
+        </div>
+      </div>
+      <button id="btn-submit-create" class="btn btn-primary" style="width:100%; justify-content:center; margin-top:6px;">
+        🚀 Wypuść radio!
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal Logowania Admina (Zabezpieczony hasłem) -->
+  <div id="modal-admin-login" class="modal-backdrop">
+    <div class="modal" style="max-width:400px;">
+      <div class="modal-head">
+        <h3>🎛️ Panel Admina (Wymagany PIN)</h3>
+        <button class="close-btn" data-close="modal-admin-login">✕</button>
+      </div>
+      <div class="field">
+        <label>Wybierz swoją stację</label>
+        <select id="adm-login-station" class="select"></select>
+      </div>
+      <div class="field">
+        <label>Kod PIN Administratora</label>
+        <input id="adm-login-pin" class="input" type="password" placeholder="Wpisz PIN..." />
+      </div>
+      <button id="btn-submit-admin-login" class="btn btn-primary" style="width:100%; justify-content:center;">
+        🔓 Otwórz Panel DJ-a / Admina
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal Hasła Słuchacza -->
+  <div id="modal-pass" class="modal-backdrop">
+    <div class="modal" style="max-width:380px;">
+      <div class="modal-head">
+        <h3>🔒 Stacja prywatna</h3>
+        <button class="close-btn" data-close="modal-pass">✕</button>
+      </div>
+      <p style="font-size:0.86rem; color:var(--text-muted); margin-bottom:12px;">Wpisz hasło, aby odblokować i włączyć stację:</p>
+      <div class="field">
+        <input id="listener-pass-input" class="input" type="password" placeholder="Hasło..." />
+      </div>
+      <button id="btn-submit-listener-pass" class="btn btn-primary" style="width:100%; justify-content:center;">
+        ▶️ Odblokuj i słuchaj
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal Motywów -->
+  <div id="modal-settings" class="modal-backdrop">
+    <div class="modal" style="max-width:400px;">
+      <div class="modal-head">
+        <h3>🎨 Motyw aplikacji</h3>
+        <button class="close-btn" data-close="modal-settings">✕</button>
+      </div>
+      <div class="field">
+        <label>Wybierz styl kolorystyczny</label>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
+          <button class="btn btn-secondary theme-pick" data-theme-val="neon">🌌 Nocny Neon</button>
+          <button class="btn btn-secondary theme-pick" data-theme-val="emerald">🌲 Szmaragd</button>
+          <button class="btn btn-secondary theme-pick" data-theme-val="amber">🔥 Bursztyn</button>
+          <button class="btn btn-secondary theme-pick" data-theme-val="light">☀️ Jasny Dzień</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-wrap" class="toast-wrap"></div>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+    import {
+      getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, getDocs
+    } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBDKA8rqWD1uv8LKHe8EVKypyOi-8zqFXQ",
+      authDomain: "miusic-73bfd.firebaseapp.com",
+      projectId: "miusic-73bfd",
+      storageBucket: "miusic-73bfd.firebasestorage.app",
+      messagingSenderId: "653754971249",
+      appId: "1:653754971249:web:2f887923c64248917197d0",
+      measurementId: "G-TGXREJ0B15"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const STATIONS_COL = collection(db, "livewave_stations");
+
+    const COVER_PRESETS = [
+      "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=75",
+      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=75",
+      "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=600&q=75",
+      "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=75",
+      "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=600&q=75",
+      "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=600&q=75",
+      "https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=600&q=75",
+      "https://images.unsplash.com/photo-1526478806334-5fd488fcaabc?auto=format&fit=crop&w=600&q=75"
+    ];
+
+    const TEMPLATES_LIST = [
+      {
+        name: "SWR3 Live Pop & Hits",
+        nowPlaying: "Największe przeboje 24/7",
+        cover: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=75",
+        type: "stream_247",
+        url: "https://liveradio.swr.de/sw282p3/swr3/play.mp3"
+      },
+      {
+        name: "RPR1. Hitradio",
+        nowPlaying: "Muzyka na dobry nastrój",
+        cover: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=75",
+        type: "stream_247",
+        url: "https://streams.rpr1.de/rpr-simulcast-128-mp3"
+      },
+      {
+        name: "Lofi Chillout Beats",
+        nowPlaying: "Relaksujące bity 24/7",
+        cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=75",
+        type: "stream_247",
+        url: "https://streams.ilovemusic.de/iloveradio17.mp3"
+      },
+      {
+        name: "Nightride Synthwave FM",
+        nowPlaying: "Synthwave & Retrowave",
+        cover: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=600&q=75",
+        type: "stream_247",
+        url: "https://stream.nightride.fm/nightride.m4a"
+      },
+      {
+        name: "Hit w Pętli YouTube",
+        nowPlaying: "Muzyczna piosenka w nieskończonej pętli",
+        cover: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=600&q=75",
+        type: "yt_loop",
+        url: "https://www.youtube.com/watch?v=5qap5aO4i9A"
+      }
+    ];
+
+    let remoteStations = [];
+    let currentPlayingStation = null;
+    let pendingUnlockStation = null;
+    let adminStationId = localStorage.getItem("lw_admin_station_id") || null;
+    let myDeviceStationIds = JSON.parse(localStorage.getItem("lw_my_device_stations") || "[]");
+    let selectedCreateCover = COVER_PRESETS[0];
+    let uploadedCreateCover = "";
+    let uploadedAdminCover = "";
+
+    function registerMyDeviceStation(id) {
+      if (!myDeviceStationIds.includes(id)) {
+        myDeviceStationIds.push(id);
+        localStorage.setItem("lw_my_device_stations", JSON.stringify(myDeviceStationIds));
+      }
+    }
+
+    function unregisterMyDeviceStation(id) {
+      myDeviceStationIds = myDeviceStationIds.filter((item) => item !== id);
+      localStorage.setItem("lw_my_device_stations", JSON.stringify(myDeviceStationIds));
+    }
+
+    const audioEl = document.createElement("audio");
+    audioEl.setAttribute("playsinline", "true");
+    audioEl.preload = "auto";
+    document.body.appendChild(audioEl);
+
+    let sharedAudioCtx = null;
+    function ensureAudioContext() {
+      if (!sharedAudioCtx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        sharedAudioCtx = new Ctx();
+      }
+      if (sharedAudioCtx.state === "suspended") {
+        sharedAudioCtx.resume().catch(() => {});
+      }
+      return sharedAudioCtx;
+    }
+
+    function showToast(text, type = "info") {
+      const wrap = document.getElementById("toast-wrap");
+      const t = document.createElement("div");
+      t.className = "toast";
+      t.textContent = text;
+      if (type === "success") t.style.borderLeftColor = "var(--success)";
+      if (type === "error") t.style.borderLeftColor = "var(--live)";
+      wrap.appendChild(t);
+      setTimeout(() => t.remove(), 4000);
+    }
+
+    // YouTube Iframe Player
+    let ytPlayer = null;
+    let ytPlayerReady = false;
+    let currentYtVideoId = "";
+    let currentYtPlaylistId = "";
+    let isYtLoopMode = false;
+
+    window.onYouTubeIframeAPIReady = function() {
+      ytPlayer = new YT.Player('yt-player-mount', {
+        height: '100%',
+        width: '100%',
+        playerVars: {
+          'autoplay': 1,
+          'controls': 0,
+          'disablekb': 1,
+          'fs': 0,
+          'rel': 0,
+          'playsinline': 1
+        },
+        events: {
+          'onReady': (e) => {
+            ytPlayerReady = true;
+          },
+          'onStateChange': (e) => {
+            // Automatyczna pętla bez potwierdzeń
+            if (e.data === YT.PlayerState.ENDED) {
+              if (isYtLoopMode && currentYtVideoId) {
+                ytPlayer.loadVideoById(currentYtVideoId);
+              } else if (currentYtPlaylistId) {
+                ytPlayer.nextVideo();
+              }
+            }
+          }
+        }
+      });
+    };
+
+    function extractYouTubeId(url) {
+      if (!url) return { videoId: "", playlistId: "" };
+      let videoId = "";
+      let playlistId = "";
+      try {
+        const parsed = new URL(url);
+        if (parsed.searchParams.has("v")) {
+          videoId = parsed.searchParams.get("v");
+        }
+        if (parsed.searchParams.has("list")) {
+          playlistId = parsed.searchParams.get("list");
+        }
+        if (!videoId && parsed.hostname === "youtu.be") {
+          videoId = parsed.pathname.slice(1);
+        }
+      } catch (err) {
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        if (match && match[2].length === 11) {
+          videoId = match[2];
+        }
+      }
+      return { videoId, playlistId };
+    }
+
+    function playStation(station) {
+      currentPlayingStation = station;
+      document.getElementById("player-bar").classList.add("active");
+      document.getElementById("pl-cover").src = station.cover || COVER_PRESETS[0];
+      document.getElementById("pl-title").textContent = station.name;
+      document.getElementById("pl-sub").textContent = station.nowPlaying || station.type;
+
+      audioEl.pause();
+      audioEl.src = "";
+      const dock = document.getElementById("yt-dock");
+      dock.classList.remove("show");
+
+      if (station.type === "yt_loop" || station.type === "yt_playlist") {
+        dock.classList.add("show");
+        const { videoId, playlistId } = extractYouTubeId(station.url);
+        isYtLoopMode = (station.type === "yt_loop");
+        currentYtVideoId = videoId;
+        currentYtPlaylistId = playlistId;
+
+        if (ytPlayerReady && ytPlayer) {
+          if (playlistId) {
+            ytPlayer.loadPlaylist({ list: playlistId, listType: 'playlist' });
+          } else if (videoId) {
+            ytPlayer.loadVideoById(videoId);
+          }
+        }
+      } else if (station.type === "stream_247" || station.type === "stream_live") {
+        audioEl.src = station.url;
+        audioEl.play().catch(() => showToast("Kliknij przycisk odtwarzania, aby włączyć audio", "error"));
+      } else if (station.type === "mic") {
+        showToast("Stacja mikrofonowa na żywo (oczekiwanie na głos DJ-a)", "info");
+      }
+      renderStations();
+    }
+
+    document.getElementById("btn-pl-toggle").addEventListener("click", () => {
+      if (audioEl.src) {
+        if (audioEl.paused) audioEl.play(); else audioEl.pause();
+      } else if (ytPlayer && ytPlayerReady) {
+        const state = ytPlayer.getPlayerState();
+        if (state === YT.PlayerState.PLAYING) {
+          ytPlayer.pauseVideo();
+        } else {
+          ytPlayer.playVideo();
+        }
+      }
+    });
+
+    document.getElementById("btn-pl-stop").addEventListener("click", () => {
+      audioEl.pause();
+      audioEl.src = "";
+      if (ytPlayer && ytPlayerReady) ytPlayer.stopVideo();
+      document.getElementById("yt-dock").classList.remove("show");
+      document.getElementById("player-bar").classList.remove("active");
+      currentPlayingStation = null;
+      renderStations();
+    });
+
+    document.getElementById("pl-vol").addEventListener("input", (e) => {
+      const val = parseFloat(e.target.value);
+      audioEl.volume = Math.min(1, val / 3);
+      if (ytPlayer && ytPlayerReady) {
+        ytPlayer.setVolume(Math.round((val / 3) * 100));
+      }
+      document.getElementById("pl-boost-val").textContent = Math.round(val * 100) + "%";
+    });
+
+    // Renderowanie kart stacji
+    function renderStations() {
+      const liveGrid = document.getElementById("live-grid");
+      const musicGrid = document.getElementById("music247-grid");
+      const playlistGrid = document.getElementById("playlist-grid");
+
+      liveGrid.innerHTML = "";
+      musicGrid.innerHTML = "";
+      playlistGrid.innerHTML = "";
+
+      let liveCount = 0, musicCount = 0, playlistCount = 0;
+
+      remoteStations.forEach((st) => {
+        const isOwner = myDeviceStationIds.includes(st.id);
+        const isPlaying = currentPlayingStation && currentPlayingStation.id === st.id;
+
+        const card = document.createElement("div");
+        card.className = `card ${isPlaying ? "playing" : ""} ${isOwner ? "is-owner" : ""}`;
+
+        let pillClass = "pill-live";
+        let pillText = "LIVE";
+        if (st.type === "stream_247") { pillClass = "pill-247"; pillText = "24/7"; musicCount++; }
+        else if (st.type === "yt_loop" || st.type === "yt_playlist") { pillClass = "pill-playlist"; pillText = "PLAYLISTA"; playlistCount++; }
+        else { liveCount++; }
+
+        let badgesHtml = `<span class="pill ${pillClass}">${pillText}</span>`;
+        if (st.pass) badgesHtml += `<span class="pill pill-lock">🔒 Prywatne</span>`;
+        if (isOwner) badgesHtml += `<span class="pill pill-owner">⭐ Twoje Radio</span>`;
+
+        card.innerHTML = `
+          <div class="card-cover">
+            <img src="${st.cover || COVER_PRESETS[0]}" alt="${st.name}" />
+            <div class="card-badges">${badgesHtml}</div>
+          </div>
+          <div class="card-body">
+            <div class="card-title">${escapeHtml(st.name)}</div>
+            <div class="card-now">🎵 ${escapeHtml(st.nowPlaying || "Muzyka na żywo")}</div>
+            <div class="card-desc">${escapeHtml(st.type === 'mic' ? 'Audycja mikrofonowa' : (st.url || 'Brak linku'))}</div>
+            <div class="card-footer">
+              <button class="btn btn-primary btn-play-station" data-id="${st.id}">
+                ${isPlaying ? "⏸️ Odtwarza" : "▶️ Słuchaj"}
+              </button>
+            </div>
+          </div>
+        `;
+
+        card.querySelector(".btn-play-station").addEventListener("click", () => {
+          if (st.pass) {
+            pendingUnlockStation = st;
+            document.getElementById("modal-pass").classList.add("open");
+          } else {
+            playStation(st);
+          }
+        });
+
+        if (st.type === "stream_247") {
+          musicGrid.appendChild(card);
+        } else if (st.type === "yt_loop" || st.type === "yt_playlist") {
+          playlistGrid.appendChild(card);
+        } else {
+          liveGrid.appendChild(card);
+        }
+      });
+
+      if (liveGrid.children.length === 0) liveGrid.innerHTML = `<div class="empty-box">Brak aktywnych stacji na żywo.</div>`;
+      if (musicGrid.children.length === 0) musicGrid.innerHTML = `<div class="empty-box">Brak stacji muzycznych 24/7.</div>`;
+      if (playlistGrid.children.length === 0) playlistGrid.innerHTML = `<div class="empty-box">Brak piosenek w pętli i playlist.</div>`;
+
+      document.getElementById("live-count").textContent = liveCount;
+      document.getElementById("music247-count").textContent = musicCount;
+      document.getElementById("playlist-count").textContent = playlistCount;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return str.replace(/[&<>'"]/g, 
+        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+      );
+    }
+
+    // Firebase Sync
+    onSnapshot(STATIONS_COL, (snapshot) => {
+      remoteStations = [];
+      snapshot.forEach((d) => {
+        remoteStations.push({ id: d.id, ...d.data() });
+      });
+      document.getElementById("sync-dot").className = "sync-dot ok";
+      document.getElementById("sync-text").textContent = "Połączono z chmurą Firebase (Online)";
+      renderStations();
+    }, (error) => {
+      document.getElementById("sync-dot").className = "sync-dot err";
+      document.getElementById("sync-text").textContent = "Błąd połączenia z bazą Firebase";
+      showToast("Błąd synchronizacji z Firebase", "error");
+    });
+
+    // Obsługa Modali
+    function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+    document.querySelectorAll("[data-close]").forEach(btn => {
+      btn.addEventListener("click", () => closeModal(btn.getAttribute("data-close")));
+    });
+
+    document.getElementById("btn-open-settings").addEventListener("click", () => {
+      document.getElementById("modal-settings").classList.add("open");
+    });
+
+    document.querySelectorAll(".theme-pick").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const theme = btn.getAttribute("data-theme-val");
+        if (theme === "neon") document.body.removeAttribute("data-theme");
+        else document.body.setAttribute("data-theme", theme);
+        localStorage.setItem("lw_theme", theme);
+        closeModal("modal-settings");
+      });
+    });
+
+    const savedTheme = localStorage.getItem("lw_theme");
+    if (savedTheme && savedTheme !== "neon") document.body.setAttribute("data-theme", savedTheme);
+
+    // Modal Tworzenia radia
+    document.getElementById("btn-open-create").addEventListener("click", () => {
+      document.getElementById("modal-create").classList.add("open");
+      buildTemplateGrid();
+      buildPresetsGrid();
+    });
+
+    function buildTemplateGrid() {
+      const grid = document.getElementById("template-grid");
+      grid.innerHTML = "";
+      TEMPLATES_LIST.forEach((tpl) => {
+        const btn = document.createElement("button");
+        btn.className = "tpl-btn";
+        btn.innerHTML = `
+          <img src="${tpl.cover}" alt="" />
+          <div>
+            <strong>${escapeHtml(tpl.name)}</strong>
+            <span>${escapeHtml(tpl.nowPlaying)}</span>
+          </div>
+        `;
+        btn.addEventListener("click", () => {
+          document.getElementById("cr-name").value = tpl.name;
+          document.getElementById("cr-now").value = tpl.nowPlaying;
+          document.getElementById("cr-type").value = tpl.type;
+          document.getElementById("cr-url").value = tpl.url;
+          selectedCreateCover = tpl.cover;
+          document.getElementById("cr-url-wrap").style.display = "block";
+          showToast("Wczytano szablon stacji!", "success");
+        });
+        grid.appendChild(btn);
+      });
+    }
+
+    function buildPresetsGrid() {
+      const presetsDiv = document.getElementById("cr-presets");
+      presetsDiv.innerHTML = "";
+      COVER_PRESETS.forEach((url, i) => {
+        const img = document.createElement("img");
+        img.className = `cover-thumb ${selectedCreateCover === url ? "selected" : ""}`;
+        img.src = url;
+        img.addEventListener("click", () => {
+          selectedCreateCover = url;
+          uploadedCreateCover = "";
+          buildPresetsGrid();
+        });
+        presetsDiv.appendChild(img);
+      });
+    }
+
+    document.getElementById("cr-type").addEventListener("change", (e) => {
+      const val = e.target.value;
+      const wrap = document.getElementById("cr-url-wrap");
+      if (val === "mic") {
+        wrap.style.display = "none";
+      } else {
+        wrap.style.display = "block";
+      }
+    });
+
+    document.getElementById("cr-cover-file").addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          uploadedCreateCover = evt.target.result;
+          showToast("Wgrano własną okładkę!", "success");
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    document.getElementById("btn-submit-create").addEventListener("click", async () => {
+      const name = document.getElementById("cr-name").value.trim();
+      const now = document.getElementById("cr-now").value.trim();
+      const type = document.getElementById("cr-type").value;
+      const url = document.getElementById("cr-url").value.trim();
+      const pass = document.getElementById("cr-pass").value.trim();
+      const pin = document.getElementById("cr-pin").value.trim() || "1234";
+
+      if (!name) {
+        showToast("Podaj nazwę radia!", "error");
+        return;
+      }
+
+      const cover = uploadedCreateCover || selectedCreateCover;
+      const stationId = "st_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+
+      try {
+        await setDoc(doc(db, "livewave_stations", stationId), {
+          name,
+          nowPlaying: now || "Nadaję na żywo",
+          type,
+          url,
+          pass,
+          pin,
+          cover,
+          createdAt: Date.now()
+        });
+
+        registerMyDeviceStation(stationId);
+        adminStationId = stationId;
+        localStorage.setItem("lw_admin_station_id", stationId);
+
+        closeModal("modal-create");
+        showToast("Stacja została pomyślnie utworzona!", "success");
+        openAdminPanelForStation(stationId);
+      } catch (err) {
+        showToast("Błąd zapisu w Firebase", "error");
+      }
+    });
+
+    // Panel Admina
+    document.getElementById("btn-open-admin-login").addEventListener("click", () => {
+      const select = document.getElementById("adm-login-station");
+      select.innerHTML = "";
+      if (remoteStations.length === 0) {
+        select.innerHTML = `<option value="">Brak dostępnych stacji</option>`;
+      } else {
+        remoteStations.forEach((st) => {
+          const opt = document.createElement("option");
+          opt.value = st.id;
+          opt.textContent = st.name + (myDeviceStationIds.includes(st.id) ? " (Twoje)" : "");
+          if (adminStationId === st.id) opt.selected = true;
+          select.appendChild(opt);
+        });
+      }
+      document.getElementById("modal-admin-login").classList.add("open");
+    });
+
+    document.getElementById("btn-submit-admin-login").addEventListener("click", () => {
+      const stationId = document.getElementById("adm-login-station").value;
+      const pin = document.getElementById("adm-login-pin").value.trim();
+
+      const st = remoteStations.find(s => s.id === stationId);
+      if (!st) {
+        showToast("Wybierz stację!", "error");
+        return;
+      }
+
+      const correctPin = st.pin || "1234";
+      if (pin !== correctPin) {
+        showToast("Błędny PIN Administratora!", "error");
+        return;
+      }
+
+      adminStationId = stationId;
+      localStorage.setItem("lw_admin_station_id", stationId);
+      registerMyDeviceStation(stationId);
+
+      closeModal("modal-admin-login");
+      openAdminPanelForStation(stationId);
+      showToast("Zalogowano do panelu admina!", "success");
+    });
+
+    function openAdminPanelForStation(id) {
+      const st = remoteStations.find(s => s.id === id);
+      if (!st) return;
+
+      document.getElementById("admin-panel").classList.add("show");
+      document.getElementById("admin-station-heading").textContent = "Zarządzasz: " + st.name;
+      document.getElementById("adm-name").value = st.name || "";
+      document.getElementById("adm-now").value = st.nowPlaying || "";
+      document.getElementById("adm-pass").value = st.pass || "";
+      document.getElementById("adm-type").value = st.type || "mic";
+      document.getElementById("adm-url").value = st.url || "";
+      uploadedAdminCover = st.cover || "";
+
+      const micStudio = document.getElementById("mic-studio");
+      if (st.type === "mic") {
+        micStudio.classList.add("show");
+      } else {
+        micStudio.classList.remove("show");
+      }
+    }
+
+    document.getElementById("adm-type").addEventListener("change", (e) => {
+      const val = e.target.value;
+      const micStudio = document.getElementById("mic-studio");
+      if (val === "mic") micStudio.classList.add("show");
+      else micStudio.classList.remove("show");
+    });
+
+    document.getElementById("adm-cover-file").addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          uploadedAdminCover = evt.target.result;
+          showToast("Wbrano nową okładkę dla stacji!", "success");
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    document.getElementById("btn-admin-save").addEventListener("click", async () => {
+      if (!adminStationId) return;
+      const name = document.getElementById("adm-name").value.trim();
+      const now = document.getElementById("adm-now").value.trim();
+      const pass = document.getElementById("adm-pass").value.trim();
+      const type = document.getElementById("adm-type").value;
+      const url = document.getElementById("adm-url").value.trim();
+
+      try {
+        const payload = { name, nowPlaying: now, pass, type, url };
+        if (uploadedAdminCover) payload.cover = uploadedAdminCover;
+
+        await updateDoc(doc(db, "livewave_stations", adminStationId), payload);
+        showToast("Zapisano zmiany w chmurze!", "success");
+      } catch (err) {
+        showToast("Błąd aktualizacji stacji", "error");
+      }
+    });
+
+    document.getElementById("btn-admin-close").addEventListener("click", () => {
+      document.getElementById("admin-panel").classList.remove("show");
+    });
+
+    document.getElementById("btn-admin-delete").addEventListener("click", async () => {
+      if (!adminStationId) return;
+      if (!confirm("Czy na pewno chcesz bezpowrotnie usunąć tę stację?")) return;
+
+      try {
+        await deleteDoc(doc(db, "livewave_stations", adminStationId));
+        unregisterMyDeviceStation(adminStationId);
+        adminStationId = null;
+        localStorage.removeItem("lw_admin_station_id");
+        document.getElementById("admin-panel").classList.remove("show");
+        showToast("Stacja została usunięta", "success");
+      } catch (err) {
+        showToast("Błąd usuwania stacji", "error");
+      }
+    });
+
+    // Hasło dla słuchacza
+    document.getElementById("btn-submit-listener-pass").addEventListener("click", () => {
+      const val = document.getElementById("listener-pass-input").value.trim();
+      if (pendingUnlockStation && val === pendingUnlockStation.pass) {
+        closeModal("modal-pass");
+        playStation(pendingUnlockStation);
+        pendingUnlockStation = null;
+        document.getElementById("listener-pass-input").value = "";
+        showToast("Odblokowano stację prywatną!", "success");
+      } else {
+        showToast("Błędne hasło stacji!", "error");
+      }
+    });
+  </script>
+</body>
+</html>
